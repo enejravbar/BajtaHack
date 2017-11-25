@@ -70,7 +70,7 @@ streznik.post("/addRoom", function(zahteva,odgovor){
 			var query = connection.query('INSERT INTO room SET ?', post, function (error, results, fields) {
 			if (error) throw error;
 				//sth,
-				
+
 			});
 
 			connection.release();
@@ -148,7 +148,7 @@ streznik.post("/removeRoom", function(zahteva,odgovor){
 		if (!napaka1) {
 			var query = connection.query('DELETE FROM room WHERE roomID ='+zahteva.body.roomID, function (error, results, fields) {
 				if (error) throw error;
-				
+
 			});
 		} else {
 			odgovor.json({
@@ -166,34 +166,34 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 				if (error) throw error;
 				//console.log(results[0]);
 				var j = 1;
-				
+
 				var tabela_data = [];
-				
+
 				var objekt0 = {
-					roomID:results[0].roomID,
-					roomName:results[0].roomName,
-					ipAddress:results[0].ipAddress,
+					id:results[0].roomID,
+					name:results[0].roomName,
+          controller:{ip:results[0].ipAddress},
 					lights:[{
 						offsetX:results[0].offsetX,
 						offsetY:results[0].offsetY,
 						gpioPin:results[0].gpioPin,
-						lightStatus:results[0].lightStatus
+						status:results[0].lightStatus
 					}]
 				};
-				
+
 				for(var i=1; i<results.length; i++){
-					
+
 					if( results[i-1].roomID !=  results[i].roomID){
 						tabela_data.push(objekt0);
 						var objekt1={
-							roomID:results[i].roomID,
-							roomName:results[i].roomName,
-							ipAddress:results[i].ipAddress,
+							id:results[i].roomID,
+							name:results[i].roomName,
+							controller:{ip:results[i].ipAddress},
 							lights:[{
 								offsetX:results[i].offsetX,
 								offsetY:results[i].offsetY,
 								gpioPin:results[i].gpioPin,
-								lightStatus:results[i].lightStatus
+								status:results[i].lightStatus
 							}]
 						}
 						objekt0=objekt1;
@@ -202,13 +202,14 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 								offsetX:results[i].offsetX,
 								offsetY:results[i].offsetY,
 								gpioPin:results[i].gpioPin,
-								lightStatus:results[i].lightStatus
+								status:results[i].lightStatus
 						});
 					}
 
 				}
 				tabela_data.push(objekt0);
-				
+
+        odgovor.send(tabela_data);
 				console.log(tabela_data);
 			});
 		} else {
