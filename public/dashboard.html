@@ -200,8 +200,8 @@
                                     <td>Light {{lightID}}</td>
                                     <td>
                                       <select v-model="l.gpioPin">
-                                        <option value="0">GPIO 0</option>
-                                        <option v-for="i in 29" v-bind:value="i">GPIO {{i}}</option>
+
+                                        <option v-for="i in gpioPins" v-bind:value="i">GPIO {{i}}</option>
                                       </select>
                                     </td>
                                     <td>

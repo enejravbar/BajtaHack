@@ -1,6 +1,7 @@
 $(document).ready(function(){
   var roomsTable=[];
 
+
   $.ajax({
       url:'/getRooms',
       type:'get',
@@ -10,14 +11,30 @@ $(document).ready(function(){
       success:function(odgovor){
           roomsTable=odgovor;
 
-          console.log("REQUEST", roomsTable);
           var roomsMenu = new Vue({
             el: '#rooms-list',
             data: {
               connectionNotification:"",
+              gpioPins:[24,25,26,27],
               rooms: roomsTable
             },
+            ready() {
+                  this.getMessages();
+            },
             methods: {
+              getMessages: function() {
+
+                $.ajax({
+                  url:'/getRooms',
+                  type:'get',
+                  contentType: 'application/json',
+                  async: true,
+                  success: function (result) {
+                      console.log("Pridobil sem nove podatke!");
+                  }
+                })
+                setTimeout(this.getMessages, 5000);
+              },
               redirect: function(room){
                 console.log("redirect on /room",room.id)
                 window.location.replace("/room"+room.id);
@@ -31,7 +48,8 @@ $(document).ready(function(){
               saveConfiguration: function(room){
 
                 data=[];
-
+                var slovar={}
+                var Gstates={};
                 for(var i=0; i<room.lights.length; i++){
                   var lightEl={
                     offsetX:room.lights[i].offsetX,
@@ -39,9 +57,15 @@ $(document).ready(function(){
                     gpioPin:room.lights[i].gpioPin,
                     status:parseInt(room.lights[i].status*1)
                   }
+
+
+                  Gstates[lightEl.gpioPin]=[lightEl.status, "out"];
+                  slovar["Gstates"]=Gstates;
                   data.push(lightEl);
+
                 }
 
+                console.log(JSON.stringify(slovar));
                 $.ajax({
                     url:'/saveConfiguration',
                     type:'post',
@@ -121,7 +145,7 @@ $(document).ready(function(){
                       for (var i=0; i< room.lights.length;i++){
                         var x=room.lights[i].offsetX*svg.width()-sirinaSlike/2;
                         var y=room.lights[i].offsetY*svg.height()-visinaSlike/2;
-                        var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.jpg", x, y);
+                        var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.png", x, y);
                         room.lights[i].objectPointer=novaLuc; // assing each light object pointer for easy manage
                         room.lights[i].selected=false;
                         room.lights[i].status=false;
@@ -171,7 +195,7 @@ $(document).ready(function(){
                     console.log("Tabela luči",room.lights)
                     var x=newLight.offsetX*svg.width()-sirinaSlike/2;
                     var y=newLight.offsetY*svg.height()-visinaSlike/2;
-                    var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.jpg", x, y);
+                    var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.png", x, y);
                     newLight.objectPointer=novaLuc; // assing each light object pointer for easy manage
                     svg.append(novaLuc);
 

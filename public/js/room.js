@@ -43,7 +43,7 @@ $(document).ready(function(){
               svg.append(roomMap);
 
               var light = new Image();
-              light.src = "images/light_OFF.jpg";
+              light.src = "images/light_OFF.png";
               sirinaSlike= 40;
               visinaSlike= 40;
               console.log("Stevilo luči, ki so že dodane", room.lights.length)
@@ -51,7 +51,8 @@ $(document).ready(function(){
               for (var i=0; i< room.lights.length;i++){
                 var x=room.lights[i].offsetX*svg.width()-sirinaSlike/2;
                 var y=room.lights[i].offsetY*svg.height()-visinaSlike/2;
-                var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.jpg", x, y);
+
+                var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.png", x, y);
                 room.lights[i].objectPointer=novaLuc; // assing each light object pointer for easy manage
                 room.lights[i].selected=false;
                 svg.append(novaLuc);

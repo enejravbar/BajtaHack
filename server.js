@@ -166,7 +166,7 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 	pool.getConnection(function(napaka1, connection) {
 		if (!napaka1) {
 
-			var query = connection.query('SELECT r.roomID,r.roomName, r.ipAddress FROM room r', function (error, results, fields) {
+			var query = connection.query('SELECT * FROM room r', function (error, results, fields) {
 				if (error) throw error;
 				//console.log(results[0]);
 
@@ -180,7 +180,7 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 					var objekt0 = {
   					id:results[0].roomID,
   					name:results[0].roomName,
-            controller:{ip:results[0].ipAddress},
+            controller:{ip:results[0].ipAddress, connection:results[0].connected, configuration: results[0].configured},
             lights:[]
 					};
 
@@ -190,7 +190,7 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 							var objekt1={
 								id:results[i].roomID,
 								name:results[i].roomName,
-                controller:{ip:results[i].ipAddress},
+                controller:{ip:results[i].ipAddress, connection:results[i].connected, configuration: results[i].configured},
                 lights:[]
 							}
 							objekt0=objekt1;
