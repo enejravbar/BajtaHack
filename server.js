@@ -5,6 +5,9 @@ var bodyParser= require('body-parser');
 var multer = require('multer');
 var mysql = require('mysql');
 
+if (!process.env.PORT)
+  process.env.PORT = 8080;
+
 var streznik = express();
 
 var storage = multer.diskStorage({
@@ -29,10 +32,10 @@ var http = require('http');
 var httpServer = http.createServer(streznik);
 
 pool = mysql.createPool({
-	    host: "192.168.10.1",
+	    host: "192.168.0.100",
 	    user: "root",
-	    password: "geslo",
-	    database: "imePodatkovneBaze",
+	    password: "root",
+	    database: "bajtahack",
 	    charset: "UTF8_GENERAL_CI"
 	});
 
@@ -58,24 +61,51 @@ streznik.post("/uploadRoomMap", function(zahteva, odgovor){
 	odgovor.redirect("/");
 })
 
-streznik.post("/izbrisiVseZapise", function(zahteva,odgovor){
+streznik.post("/addRoom", function(zahteva,odgovor){
 	pool.getConnection(function(napaka1, connection) {
-
+            var name = zahteva.body.roomName;
+            var roomDescri = zahteva.body.roomDescription;
 	        if (!napaka1) {
-	        	console.log('DELETE FROM meritve;');
-	            connection.query('DELETE FROM meritve;', function(napaka2, info) {
-	                if (!napaka2) {
-	                    odgovor.json({
-	                    	uspeh:true
-	                    });
-	                } else {
-	                    odgovor.json({
-	                    	uspeh:false,
-	                    	odgovor:"Napaka! Brisanje zapisov ni bilo uspešno!"
-	                    });
-	                }
+	        	console.log(name);
+				//console.log(roomDescription);
+				var post  = {roomName: name, roomDescription: roomDescri, controllerID:null};
+				var query = connection.query('INSERT INTO room SET ?', post, function (error, results, fields) {
+				if (error) throw error;
+					//sth,
+					
+				});
 
-	            });
+	            connection.release();
+
+	        } else {
+	            odgovor.json({
+                	uspeh:false,
+                	odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
+                });
+	        }
+	    });
+})
+
+streznik.post("/addController", function(zahteva,odgovor){
+	pool.getConnection(function(napaka1, connection) {
+            var romID = zahteva.body.roomID;
+            var ip = zahteva.body.ipAddress;
+	        if (!napaka1) {
+	        	console.log(name);
+				//console.log(roomDescription);
+				var post  = {ipAddress: ip};
+				var query = connection.query('INSERT INTO controller SET ?', post, function (error, results, fields) {
+					if (error) throw error;
+					else{
+						var conID = results.controllerID;
+						console.log(results)
+						console.log(conID)
+						var post1  = {roomID: romID};
+						//var query1 = connection.query('UPDATE room SET controllerID = ? WHERE last_name ='+conID, post, function (error, results, fields) {
+						//	if (error) throw error;
+						//});
+					}
+				});
 
 	            connection.release();
 
