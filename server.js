@@ -168,7 +168,9 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 				var j = 1;
 				
 				var tabela_data = [];
-				
+				if(results=null){
+					odgovor.send([]);
+				}
 				var objekt0 = {
 					roomID:results[0].roomID,
 					roomName:results[0].roomName,
@@ -209,6 +211,7 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 				}
 				tabela_data.push(objekt0);
 				
+				odgovor.send(tabela_data);
 				console.log(tabela_data);
 			});
 		} else {
@@ -219,3 +222,31 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 		}
 	});
 })
+
+streznik.get("/getRoom:id", function(zahteva,odgovor){
+	pool.getConnection(function(napaka1, connection) {
+		if (!napaka1) {
+			var query = connection.query('SELECT r.roomID,r.roomName,c.ipAddress,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,controller c,room_lights l WHERE r.controllerID = c.controllerID AND r.roomID = l.roomID AND r.roomID='+zahteva.params.id, function (error, results, fields) {
+				if (error) throw error;
+				var objekt0 = {
+					roomID:results[0].roomID,
+					roomName:results[0].roomName,
+					ipAddress:results[0].ipAddress,
+					lights:[{
+						offsetX:results[0].offsetX,
+						offsetY:results[0].offsetY,
+						gpioPin:results[0].gpioPin,
+						lightStatus:results[0].lightStatus
+					}]
+				};
+			});
+			odgovor.send(tabela_data);
+		} else {
+			odgovor.json({
+				uspeh:false,
+				odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
+			});
+		}
+	});
+})
+
