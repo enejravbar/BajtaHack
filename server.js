@@ -63,46 +63,15 @@ streznik.post("/addRoom", function(zahteva,odgovor){
 	pool.getConnection(function(napaka1, connection) {
 		var name = zahteva.body.roomName;
 		var roomDescri = zahteva.body.roomDescription;
+		var ip = zahteva.body.ipAddress;
 		if (!napaka1) {
 			console.log(name);
 			//console.log(roomDescription);
-			var post  = {roomName: name, roomDescription: roomDescri, controllerID:null};
+			var post  = {roomName: name, roomDescription: roomDescri, ipAddress:ip};
 			var query = connection.query('INSERT INTO room SET ?', post, function (error, results, fields) {
 			if (error) throw error;
 				//sth,
 
-			});
-
-			connection.release();
-
-		} else {
-			odgovor.json({
-				uspeh:false,
-				odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
-			});
-		}
-	});
-})
-
-streznik.post("/addController", function(zahteva,odgovor){
-	pool.getConnection(function(napaka1, connection) {
-		var romID = zahteva.body.roomID;
-		var ip = zahteva.body.ipAddress;
-		if (!napaka1) {
-			console.log(romID);
-			console.log(ip);
-			var post  = {ipAddress: ip};
-			var query = connection.query('INSERT INTO controller SET ?', post, function (error, results, fields) {
-				if (error) throw error;
-				else{
-					var conID = results.insertId;
-					console.log(results)
-					console.log(conID)
-					var post1  = {roomID: romID};
-					var query1 = connection.query('UPDATE room SET controllerID =' +conID +' WHERE roomID = '+ romID, function (error, results, fields) {
-						if (error) throw error;
-					});
-				}
 			});
 
 			connection.release();
@@ -162,7 +131,7 @@ streznik.post("/removeRoom", function(zahteva,odgovor){
 streznik.get("/getRooms", function(zahteva,odgovor){
 	pool.getConnection(function(napaka1, connection) {
 		if (!napaka1) {
-			var query = connection.query('SELECT r.roomID,r.roomName,c.ipAddress,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,controller c,room_lights l WHERE r.controllerID = c.controllerID AND r.roomID = l.roomID', function (error, results, fields) {
+			var query = connection.query('SELECT r.roomID,r.roomName,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,room_lights l WHERE r.roomID = l.roomID', function (error, results, fields) {
 				if (error) throw error;
 				//console.log(results[0]);
 				var j = 1;
@@ -173,43 +142,43 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 				if(results.length==0){
           console.log("RESULTS JE PRAZNA!!!!!!!!!!!!!!!!!!!!!!")
 					odgovor.send([]);
-				}else{
-          var objekt0 = {
+				} else{
+					var objekt0 = {
   					id:results[0].roomID,
   					name:results[0].roomName,
-            controller:{ip:results[0].ipAddress},
+					controller:{ip:results[0].ipAddress},
   					lights:[{
   						offsetX:results[0].offsetX,
   						offsetY:results[0].offsetY,
   						gpioPin:results[0].gpioPin,
   						status:results[0].lightStatus
   					}]
-  				};
+					};
 
-  				for(var i=1; i<results.length; i++){
+					for(var i=1; i<results.length; i++){
 
-  					if( results[i-1].roomID !=  results[i].roomID){
-  						tabela_data.push(objekt0);
-  						var objekt1={
-  							id:results[i].roomID,
-  							name:results[i].roomName,
-  							controller:{ip:results[i].ipAddress},
-  							lights:[{
-  								offsetX:results[i].offsetX,
-  								offsetY:results[i].offsetY,
-  								gpioPin:results[i].gpioPin,
-  								status:results[i].lightStatus
-  							}]
-  						}
-  						objekt0=objekt1;
-  					}else{
-  						objekt0.lights.push({
-  								offsetX:results[i].offsetX,
-  								offsetY:results[i].offsetY,
-  								gpioPin:results[i].gpioPin,
-  								status:results[i].lightStatus
-  						});
-  					}
+						if( results[i-1].roomID !=  results[i].roomID){
+							tabela_data.push(objekt0);
+							var objekt1={
+								id:results[i].roomID,
+								name:results[i].roomName,
+								controller:{ip:results[i].ipAddress},
+								lights:[{
+									offsetX:results[i].offsetX,
+									offsetY:results[i].offsetY,
+									gpioPin:results[i].gpioPin,
+									status:results[i].lightStatus
+								}]
+							}
+							objekt0=objekt1;
+						}else{
+							objekt0.lights.push({
+									offsetX:results[i].offsetX,
+									offsetY:results[i].offsetY,
+									gpioPin:results[i].gpioPin,
+									status:results[i].lightStatus
+							});
+						}
 
   				}
   				tabela_data.push(objekt0);
@@ -233,7 +202,7 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 streznik.get("/getRoom:id", function(zahteva,odgovor){
 	pool.getConnection(function(napaka1, connection) {
 		if (!napaka1) {
-			var query = connection.query('SELECT r.roomID,r.roomName,c.ipAddress,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,controller c,room_lights l WHERE r.controllerID = c.controllerID AND r.roomID = l.roomID AND r.roomID='+zahteva.params.id, function (error, results, fields) {
+			var query = connection.query('SELECT r.roomID,r.roomName,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,room_lights l WHERE r.roomID = l.roomID AND r.roomID='+zahteva.params.id, function (error, results, fields) {
 				if (error) throw error;
 				var objekt0 = {
 					roomID:results[0].roomID,
