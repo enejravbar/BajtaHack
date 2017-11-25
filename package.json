@@ -1,0 +1,13 @@
+{
+  "name": "LightControlSystem",
+  "author": "Bajtahack",
+  "dependencies": {
+    "express": "latest",
+    "util": "latest",
+    "fs": "latest",
+    "http": "latest",
+    "body-parser": "latest",
+    "mysql": "latest",
+    "multer": "latest"
+  }
+}
