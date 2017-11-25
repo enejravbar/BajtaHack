@@ -37,7 +37,7 @@ $(document).ready(function(){
                     async: true,
                     data: JSON.stringify({
                       roomID: room.id,
-                      ipAddress: $("#controller"+room.id).val()
+                      ipAddress: $("#controller").val()
                     }),
 
                     success:function(){

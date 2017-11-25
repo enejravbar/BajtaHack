@@ -169,53 +169,57 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 
 				var tabela_data = [];
 
-				if(results=null){
+        console.log(results);
+				if(results.length==0){
+          console.log("RESULTS JE PRAZNA!!!!!!!!!!!!!!!!!!!!!!")
 					odgovor.send([]);
-				}
+				}else{
+          var objekt0 = {
+  					id:results[0].roomID,
+  					name:results[0].roomName,
+            controller:{ip:results[0].ipAddress},
+  					lights:[{
+  						offsetX:results[0].offsetX,
+  						offsetY:results[0].offsetY,
+  						gpioPin:results[0].gpioPin,
+  						status:results[0].lightStatus
+  					}]
+  				};
 
-				var objekt0 = {
-					id:results[0].roomID,
-					name:results[0].roomName,
-          controller:{ip:results[0].ipAddress},
-					lights:[{
-						offsetX:results[0].offsetX,
-						offsetY:results[0].offsetY,
-						gpioPin:results[0].gpioPin,
-						status:results[0].lightStatus
-					}]
-				};
+  				for(var i=1; i<results.length; i++){
 
-				for(var i=1; i<results.length; i++){
+  					if( results[i-1].roomID !=  results[i].roomID){
+  						tabela_data.push(objekt0);
+  						var objekt1={
+  							id:results[i].roomID,
+  							name:results[i].roomName,
+  							controller:{ip:results[i].ipAddress},
+  							lights:[{
+  								offsetX:results[i].offsetX,
+  								offsetY:results[i].offsetY,
+  								gpioPin:results[i].gpioPin,
+  								status:results[i].lightStatus
+  							}]
+  						}
+  						objekt0=objekt1;
+  					}else{
+  						objekt0.lights.push({
+  								offsetX:results[i].offsetX,
+  								offsetY:results[i].offsetY,
+  								gpioPin:results[i].gpioPin,
+  								status:results[i].lightStatus
+  						});
+  					}
 
-					if( results[i-1].roomID !=  results[i].roomID){
-						tabela_data.push(objekt0);
-						var objekt1={
-							id:results[i].roomID,
-							name:results[i].roomName,
-							controller:{ip:results[i].ipAddress},
-							lights:[{
-								offsetX:results[i].offsetX,
-								offsetY:results[i].offsetY,
-								gpioPin:results[i].gpioPin,
-								status:results[i].lightStatus
-							}]
-						}
-						objekt0=objekt1;
-					}else{
-						objekt0.lights.push({
-								offsetX:results[i].offsetX,
-								offsetY:results[i].offsetY,
-								gpioPin:results[i].gpioPin,
-								status:results[i].lightStatus
-						});
-					}
+  				}
+  				tabela_data.push(objekt0);
 
-				}
-				tabela_data.push(objekt0);
+          odgovor.send(tabela_data);
 
-        odgovor.send(tabela_data);
+  				console.log(tabela_data);
+        }
 
-				console.log(tabela_data);
+
 			});
 		} else {
 			odgovor.json({
