@@ -45,7 +45,6 @@ $(document).ready(function(){
             data: JSON.stringify({
               roomID: room.id,
               ipAddress: $("#controller"+room.id).val()
-
             }),
 
             success:function(){
@@ -63,9 +62,36 @@ $(document).ready(function(){
         },3000)
       },
       saveConfiguration: function(room){
+
+        data=[];
+
         for(var i=0; i<room.lights.length; i++){
-          console.log(room.lights[i].gpioPin+" ");
+          var lightEl={
+            offsetX:room.lights[i].offsetX,
+            offsetY:room.lights[i].offsetY,
+            gpioPin:room.lights[i].gpioPin,
+            status:parseInt(room.lights[i].status*1)
+          }
+          data.push(lightEl);
         }
+
+        $.ajax({
+            url:'/saveConfiguration',
+            type:'post',
+            contentType: 'application/json',
+            async: true,
+            data: JSON.stringify({
+              roomID: room.id,
+              lightsConfiguration: data
+            }),
+
+            success:function(){
+                console.log("Zahtevek za dodajanje sobe uspešno poslan!")
+            },
+            error: function(e){
+              console.log(e);
+            }
+        });
       },
       removeRoom: function(room){
         remove(this.rooms,room);
