@@ -90,33 +90,50 @@ $(document).ready(function(){
                 buttonAddLight.attr("disabled", false);
                 buttonSelectLight.attr("disabled", false);
 
-                var imageObj = new Image();
-                imageObj.src = this.roomMapPath(room);
+                $.ajax({
+                    url:'/getRoomLight'+room.id,
+                    type:'get',
+                    contentType: 'application/json',
+                    async: true,
 
-                var sirinaSlike= 550;
-                var visinaSlike= parseInt((sirinaSlike*imageObj.height)/imageObj.width);
 
-                svg.width(sirinaSlike);
-                svg.height(visinaSlike);
+                    success:function(odgovor){
+                      room.lights=odgovor;
 
-                var roomMap=createImageElement(sirinaSlike, visinaSlike, imageObj.src, 0, 0 );
-                svg.append(roomMap);
+                      var imageObj = new Image();
+                      imageObj.src = "uploads/room_"+room.id+".map";
 
-                var light = new Image();
-                light.src = "images/light_OFF.jpg";
-                sirinaSlike= 40;
-                visinaSlike= 40;
-                console.log("Stevilo luči, ki so že dodane", room.lights.length)
+                      var sirinaSlike= 550;
+                      var visinaSlike= parseInt((sirinaSlike*imageObj.height)/imageObj.width);
 
-                for (var i=0; i< room.lights.length;i++){
-                  var x=room.lights[i].offsetX*svg.width()-sirinaSlike/2;
-                  var y=room.lights[i].offsetY*svg.height()-visinaSlike/2;
-                  var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.jpg", x, y);
-                  room.lights[i].objectPointer=novaLuc; // assing each light object pointer for easy manage
-                  room.lights[i].selected=false;
-                  room.lights[i].status=false;
-                  svg.append(novaLuc);
-                }
+                      svg.width(sirinaSlike);
+                      svg.height(visinaSlike);
+
+                      var roomMap=createImageElement(sirinaSlike, visinaSlike, imageObj.src, 0, 0 );
+                      svg.append(roomMap);
+
+                      var light = new Image();
+                      light.src = "images/light_OFF.jpg";
+                      sirinaSlike= 40;
+                      visinaSlike= 40;
+                      console.log("Stevilo luči, ki so že dodane", room.lights.length)
+
+                      for (var i=0; i< room.lights.length;i++){
+                        var x=room.lights[i].offsetX*svg.width()-sirinaSlike/2;
+                        var y=room.lights[i].offsetY*svg.height()-visinaSlike/2;
+                        var novaLuc=createImageElement(sirinaSlike, visinaSlike, "images/light_OFF.jpg", x, y);
+                        room.lights[i].objectPointer=novaLuc; // assing each light object pointer for easy manage
+                        room.lights[i].selected=false;
+                        room.lights[i].status=false;
+                        svg.append(novaLuc);
+                      }
+                    },
+                    error: function(e){
+                      console.log(e);
+                    }
+                });
+
+
 
 
               },
@@ -266,12 +283,14 @@ $(document).ready(function(){
             }),
 
             success:function(){
+                window.location.href = "/";
                 console.log("Zahtevek za dodajanje sobe uspešno poslan!")
             },
             error: function(e){
               console.log(e);
             }
         });
+
       }
     }
 

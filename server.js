@@ -131,10 +131,11 @@ streznik.post("/saveConfiguration", function(zahteva,odgovor){
 							if (error) throw error;
 
 						});
-						//connection.release();
+
 					}
 				}
 			});
+      connection.release();
 		} else {
 			odgovor.json({
 				uspeh:false,
@@ -151,6 +152,7 @@ streznik.post("/removeRoom", function(zahteva,odgovor){
 				if (error) throw error;
 
 			});
+      connection.release();
 		} else {
 			odgovor.json({
 				uspeh:false,
@@ -163,65 +165,43 @@ streznik.post("/removeRoom", function(zahteva,odgovor){
 streznik.get("/getRooms", function(zahteva,odgovor){
 	pool.getConnection(function(napaka1, connection) {
 		if (!napaka1) {
-			var query = connection.query('SELECT r.roomID,r.roomName,r.ipAddress,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r, room_lights WHERE r.roomID=l.roomID ', function (error, results, fields) {
+
+			var query = connection.query('SELECT r.roomID,r.roomName, r.ipAddress FROM room r', function (error, results, fields) {
 				if (error) throw error;
 				//console.log(results[0]);
-				var j = 1;
 
 				var tabela_data = [];
 
-        console.log(results);
+				console.log(results);
 				if(results.length==0){
-          console.log("RESULTS JE PRAZNA!!!!!!!!!!!!!!!!!!!!!!")
+					console.log("RESULTS JE PRAZNA!!!!!!!!!!!!!!!!!!!!!!")
 					odgovor.send([]);
-				}else{
-          var objekt0 = {
+				} else{
+					var objekt0 = {
   					id:results[0].roomID,
   					name:results[0].roomName,
             controller:{ip:results[0].ipAddress},
-  					lights:[{
-  						offsetX:results[0].offsetX,
-  						offsetY:results[0].offsetY,
-  						gpioPin:results[0].gpioPin,
-  						status:results[0].lightStatus
-  					}]
-  				};
+            lights:[]
+					};
 
-  				for(var i=1; i<results.length; i++){
-
-  					if( results[i-1].roomID !=  results[i].roomID){
-  						tabela_data.push(objekt0);
-  						var objekt1={
-  							id:results[i].roomID,
-  							name:results[i].roomName,
-  							controller:{ip:results[i].ipAddress},
-  							lights:[{
-  								offsetX:results[i].offsetX,
-  								offsetY:results[i].offsetY,
-  								gpioPin:results[i].gpioPin,
-  								status:results[i].lightStatus
-  							}]
-  						}
-  						objekt0=objekt1;
-  					}else{
-  						objekt0.lights.push({
-  								offsetX:results[i].offsetX,
-  								offsetY:results[i].offsetY,
-  								gpioPin:results[i].gpioPin,
-  								status:results[i].lightStatus
-  						});
-  					}
-
-  				}
-  				tabela_data.push(objekt0);
-
-          odgovor.send(tabela_data);
-
-  				console.log(tabela_data);
-        }
-
-
+					for(var i=1; i<results.length; i++){
+						if( results[i-1].roomID !=  results[i].roomID){
+							tabela_data.push(objekt0);
+							var objekt1={
+								id:results[i].roomID,
+								name:results[i].roomName,
+                controller:{ip:results[i].ipAddress},
+                lights:[]
+							}
+							objekt0=objekt1;
+						}
+					}
+					tabela_data.push(objekt0);
+					odgovor.send(tabela_data);
+					console.log(tabela_data);
+				}
 			});
+      connection.release();
 		} else {
 			odgovor.json({
 				uspeh:false,
@@ -231,24 +211,29 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 	});
 })
 
-streznik.get("/getRoom:id", function(zahteva,odgovor){
-	pool.getConnection(function(napaka1, connection) {
+streznik.get("/getRoomLight:id", function(zahteva,odgovor){
+
+  tableLights=[];
+
+  pool.getConnection(function(napaka1, connection) {
 		if (!napaka1) {
-			var query = connection.query('SELECT r.roomID,r.roomName,c.ipAddress,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,controller c,room_lights l WHERE r.controllerID = c.controllerID AND r.roomID = l.roomID AND r.roomID='+zahteva.params.id, function (error, results, fields) {
+			var query = connection.query('SELECT l.roomID,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room_lights l WHERE l.roomID='+zahteva.params.id, function (error, results, fields) {
 				if (error) throw error;
-				var objekt0 = {
-					roomID:results[0].roomID,
-					roomName:results[0].roomName,
-					ipAddress:results[0].ipAddress,
-					lights:[{
-						offsetX:results[0].offsetX,
-						offsetY:results[0].offsetY,
-						gpioPin:results[0].gpioPin,
-						lightStatus:results[0].lightStatus
-					}]
-				};
+
+        for( var i=0; i<results.length;i++){
+          var lights={
+						offsetX:results[i].offsetX,
+						offsetY:results[i].offsetY,
+						gpioPin:results[i].gpioPin,
+						status:results[i].lightStatus,
+            selected:false
+					};
+          tableLights.push(lights);
+        }
+        console.log(tableLights);
+        odgovor.send(tableLights);
 			});
-			odgovor.send(tabela_data);
+      connection.release();
 		} else {
 			odgovor.json({
 				uspeh:false,
