@@ -212,13 +212,9 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 
 				}
 				tabela_data.push(objekt0);
-<<<<<<< HEAD
 
         odgovor.send(tabela_data);
-=======
 
-				odgovor.send(tabela_data);
->>>>>>> ebe4f845ad9622b7d5dfaf5aa6d19792032a6133
 				console.log(tabela_data);
 			});
 		} else {
