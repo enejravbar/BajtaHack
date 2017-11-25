@@ -4,7 +4,7 @@ var path = require('path');
 var bodyParser= require('body-parser');
 var multer = require('multer');
 var mysql = require('mysql');
-
+var groupBy = require('group-by');
 
 var streznik = express();
 
@@ -140,7 +140,7 @@ streznik.post("/saveConfiguration", function(zahteva,odgovor){
 				odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
 			});
 		}
-	);
+	});
 })
 
 streznik.post("/removeRoom", function(zahteva,odgovor){
@@ -156,6 +156,66 @@ streznik.post("/removeRoom", function(zahteva,odgovor){
 				odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
 			});
 		}
-	);
+	});
 })
 
+streznik.get("/getRooms", function(zahteva,odgovor){
+	pool.getConnection(function(napaka1, connection) {
+		if (!napaka1) {
+			var query = connection.query('SELECT r.roomID,r.roomName,c.ipAddress,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,controller c,room_lights l WHERE r.controllerID = c.controllerID AND r.roomID = l.roomID', function (error, results, fields) {
+				if (error) throw error;
+				//console.log(results[0]);
+				var j = 1;
+				
+				var tabela_data = [];
+				
+				var objekt0 = {
+					roomID:results[0].roomID,
+					roomName:results[0].roomName,
+					ipAddress:results[0].ipAddress,
+					lights:[{
+						offsetX:results[0].offsetX,
+						offsetY:results[0].offsetY,
+						gpioPin:results[0].gpioPin,
+						lightStatus:results[0].lightStatus
+					}]
+				};
+				
+				for(var i=1; i<results.length; i++){
+					
+					if( results[i-1].roomID !=  results[i].roomID){
+						tabela_data.push(objekt0);
+						var objekt1={
+							roomID:results[i].roomID,
+							roomName:results[i].roomName,
+							ipAddress:results[i].ipAddress,
+							lights:[{
+								offsetX:results[i].offsetX,
+								offsetY:results[i].offsetY,
+								gpioPin:results[i].gpioPin,
+								lightStatus:results[i].lightStatus
+							}]
+						}
+						objekt0=objekt1;
+					}else{
+						objekt0.lights.push({
+								offsetX:results[i].offsetX,
+								offsetY:results[i].offsetY,
+								gpioPin:results[i].gpioPin,
+								lightStatus:results[i].lightStatus
+						});
+					}
+
+				}
+				tabela_data.push(objekt0);
+				
+				console.log(tabela_data);
+			});
+		} else {
+			odgovor.json({
+				uspeh:false,
+				odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
+			});
+		}
+	});
+})

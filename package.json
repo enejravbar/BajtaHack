@@ -2,12 +2,13 @@
   "name": "LightControlSystem",
   "author": "Bajtahack",
   "dependencies": {
-    "express": "latest",
-    "util": "latest",
-    "fs": "latest",
-    "http": "latest",
     "body-parser": "latest",
+    "express": "latest",
+    "fs": "latest",
+    "group-by": "0.0.1",
+    "http": "latest",
+    "multer": "latest",
     "mysql": "latest",
-    "multer": "latest"
+    "util": "latest"
   }
 }
