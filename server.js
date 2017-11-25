@@ -57,33 +57,3 @@ streznik.post("/uploadRoomMap", function(zahteva, odgovor){
   console.log("Dobil sem zahtevek na /addRoomMap roomId=", zahteva.body.roomId," imeSlike=",imeSlike);
 	odgovor.redirect("/");
 })
-
-streznik.post("/izbrisiVseZapise", function(zahteva,odgovor){
-	pool.getConnection(function(napaka1, connection) {
-
-	        if (!napaka1) {
-	        	console.log('DELETE FROM meritve;');
-	            connection.query('DELETE FROM meritve;', function(napaka2, info) {
-	                if (!napaka2) {
-	                    odgovor.json({
-	                    	uspeh:true
-	                    });
-	                } else {
-	                    odgovor.json({
-	                    	uspeh:false,
-	                    	odgovor:"Napaka! Brisanje zapisov ni bilo uspešno!"
-	                    });
-	                }
-
-	            });
-
-	            connection.release();
-
-	        } else {
-	            odgovor.json({
-                	uspeh:false,
-                	odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
-                });
-	        }
-	    });
-})
