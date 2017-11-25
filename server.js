@@ -169,6 +169,10 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 
 				var tabela_data = [];
 
+				if(results=null){
+					odgovor.send([]);
+				}
+
 				var objekt0 = {
 					id:results[0].roomID,
 					name:results[0].roomName,
@@ -208,10 +212,42 @@ streznik.get("/getRooms", function(zahteva,odgovor){
 
 				}
 				tabela_data.push(objekt0);
+<<<<<<< HEAD
 
         odgovor.send(tabela_data);
+=======
+
+				odgovor.send(tabela_data);
+>>>>>>> ebe4f845ad9622b7d5dfaf5aa6d19792032a6133
 				console.log(tabela_data);
 			});
+		} else {
+			odgovor.json({
+				uspeh:false,
+				odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
+			});
+		}
+	});
+})
+
+streznik.get("/getRoom:id", function(zahteva,odgovor){
+	pool.getConnection(function(napaka1, connection) {
+		if (!napaka1) {
+			var query = connection.query('SELECT r.roomID,r.roomName,c.ipAddress,l.offsetX,l.offsetY,l.gpioPin,l.lightStatus  FROM room r,controller c,room_lights l WHERE r.controllerID = c.controllerID AND r.roomID = l.roomID AND r.roomID='+zahteva.params.id, function (error, results, fields) {
+				if (error) throw error;
+				var objekt0 = {
+					roomID:results[0].roomID,
+					roomName:results[0].roomName,
+					ipAddress:results[0].ipAddress,
+					lights:[{
+						offsetX:results[0].offsetX,
+						offsetY:results[0].offsetY,
+						gpioPin:results[0].gpioPin,
+						lightStatus:results[0].lightStatus
+					}]
+				};
+			});
+			odgovor.send(tabela_data);
 		} else {
 			odgovor.json({
 				uspeh:false,
