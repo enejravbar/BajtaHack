@@ -4,7 +4,6 @@ $(document).ready(function(){
     name:"Podstrešje",
     controller:{ip:"", connection:false, configuration:true},
     lights:[],
-    GPIOConfiguration:[],
     numberOfLightsON:444,
     numberOfLightsOFF:333
   };
@@ -14,7 +13,6 @@ $(document).ready(function(){
     name:"Garaža",
     controller:{ip:"", connection:true, configuration:false},
     lights:[],
-    GPIOConfiguration:[],
     numberOfLightsON:12,
     numberOfLightsOFF:6
   };
@@ -38,6 +36,26 @@ $(document).ready(function(){
       },
       saveConnectionSettings: function(room){
         this.connectionNotification="Nastavitve uspešno shranjene!"
+        console.log("$(#controller-ip+room.id).val() = ","#controller"+room.id)
+        $.ajax({
+            url:'/addController',
+            type:'post',
+            contentType: 'application/json',
+            async: true,
+            data: JSON.stringify({
+              roomID: room.id,
+              ipAddress: $("#controller"+room.id).val()
+
+            }),
+
+            success:function(){
+                console.log("Zahtevek za dodajanje sobe uspešno poslan!")
+            },
+            error: function(e){
+              console.log(e);
+            }
+        });
+
         $("#modal-connect-notification").attr("class","bg-success");
         $("#modal-connect-notification").show();
         setTimeout(function(){
@@ -206,7 +224,7 @@ $(document).ready(function(){
             async: true,
             data: JSON.stringify({
               roomName: $("#modal-addRoom-roomName").val(),
-              roomDescription: $("#modal-addRoom-roomDescription").val()
+              roomDescription:$("#modal-addRoom-roomDescription").val()
             }),
 
             success:function(){

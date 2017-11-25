@@ -5,8 +5,6 @@ var bodyParser= require('body-parser');
 var multer = require('multer');
 var mysql = require('mysql');
 
-if (!process.env.PORT)
-  process.env.PORT = 8080;
 
 var streznik = express();
 
@@ -91,19 +89,19 @@ streznik.post("/addController", function(zahteva,odgovor){
             var romID = zahteva.body.roomID;
             var ip = zahteva.body.ipAddress;
 	        if (!napaka1) {
-	        	console.log(name);
-				//console.log(roomDescription);
+	        	console.log(romID);
+				console.log(ip);
 				var post  = {ipAddress: ip};
 				var query = connection.query('INSERT INTO controller SET ?', post, function (error, results, fields) {
 					if (error) throw error;
 					else{
-						var conID = results.controllerID;
+						var conID = results.insertId;
 						console.log(results)
 						console.log(conID)
 						var post1  = {roomID: romID};
-						//var query1 = connection.query('UPDATE room SET controllerID = ? WHERE last_name ='+conID, post, function (error, results, fields) {
-						//	if (error) throw error;
-						//});
+						var query1 = connection.query('UPDATE room SET controllerID =' +conID +' WHERE roomID = '+ romID, function (error, results, fields) {
+							if (error) throw error;
+						});
 					}
 				});
 
@@ -117,3 +115,33 @@ streznik.post("/addController", function(zahteva,odgovor){
 	        }
 	    });
 })
+
+streznik.post("/saveConfiguration", function(zahteva,odgovor){
+	pool.getConnection(function(napaka1, connection) {
+	        if (!napaka1) {
+				for(i in zahteva.body.lightsConfiguration)	
+					var post  = {roomID: zahteva.body.roomID, offsetX: i.offsetX, offsetY: i.offsetY, gpioPin: i.gpioPin, lightStatus: i.status};
+					var query = connection.query('INSERT INTO room_lights SET ?', post, function (error, results, fields) {
+						if (error) throw error;
+						else{
+							var conID = results.insertId;
+							console.log(results)
+							console.log(conID)
+							var post1  = {roomID: romID};
+							var query1 = connection.query('UPDATE room SET controllerID =' +conID +' WHERE roomID = '+ romID, function (error, results, fields) {
+								if (error) throw error;
+							});
+						}
+					});
+
+					connection.release();
+			}
+	        } else {
+	            odgovor.json({
+                	uspeh:false,
+                	odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
+                });
+	        }
+	    });
+})
+
