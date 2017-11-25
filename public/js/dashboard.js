@@ -94,6 +94,25 @@ $(document).ready(function(){
         });
       },
       removeRoom: function(room){
+        var temp=room.id;
+
+        $.ajax({
+            url:'/removeRoom',
+            type:'post',
+            contentType: 'application/json',
+            async: true,
+            data: JSON.stringify({
+              roomID: temp,
+            }),
+
+            success:function(){
+
+            },
+            error: function(e){
+              console.log(e);
+            }
+        });
+
         remove(this.rooms,room);
       },
       drawRoomMapOnCanvas: function(room){
