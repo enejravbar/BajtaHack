@@ -9,7 +9,8 @@ $(document).ready(function(){
 
       success:function(odgovor){
           roomsTable=odgovor;
-          console.log(roomsTable);
+
+          console.log("REQUEST", roomsTable);
           var roomsMenu = new Vue({
             el: '#rooms-list',
             data: {
@@ -26,33 +27,6 @@ $(document).ready(function(){
               },
               isButtonDisabled: function(room){
                 return !(room.controller.connection && room.controller.configuration);
-              },
-              saveConnectionSettings: function(room){
-                this.connectionNotification="Nastavitve uspešno shranjene!"
-                console.log("$(#controller-ip+room.id).val() = ","#controller"+room.id)
-                $.ajax({
-                    url:'/addController',
-                    type:'post',
-                    contentType: 'application/json',
-                    async: true,
-                    data: JSON.stringify({
-                      roomID: room.id,
-                      ipAddress: $("#controller").val()
-                    }),
-
-                    success:function(){
-                        console.log("Zahtevek za dodajanje sobe uspešno poslan!")
-                    },
-                    error: function(e){
-                      console.log(e);
-                    }
-                });
-
-                $("#modal-connect-notification").attr("class","bg-success");
-                $("#modal-connect-notification").show();
-                setTimeout(function(){
-                  $("#modal-connect-notification").hide();
-                },3000)
               },
               saveConfiguration: function(room){
 
@@ -287,7 +261,8 @@ $(document).ready(function(){
             async: true,
             data: JSON.stringify({
               roomName: $("#modal-addRoom-roomName").val(),
-              roomDescription:$("#modal-addRoom-roomDescription").val()
+              roomDescription:$("#modal-addRoom-roomDescription").val(),
+              ipAddress:$("#controller").val(),
             }),
 
             success:function(){
