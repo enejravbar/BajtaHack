@@ -11,8 +11,9 @@ $(document).ready(function(){
 
         var room1={
           id:getRoomID(),
-          lights:odgovor,
+          lights:odgovor
         };
+        console.log(odgovor)
 
         var room = new Vue({
           el: '#room',
@@ -23,6 +24,58 @@ $(document).ready(function(){
             redirect: function(room){
               console.log("redirect on /room",room.id)
               window.location.replace("/room"+room.id);
+            },
+            changeStateOfLight: function(room, lightID){
+              console.log("Klik zaznan!")
+              var slovar={}
+              var Gstates={};
+              room.lights[lightID].status=!room.lights[lightID].status;
+              for(var i=0; i<room.lights.length; i++){
+                var lightEl={
+                  gpioPin:room.lights[i].gpioPin,
+                  status:parseInt(room.lights[i].status*1)
+                }
+
+                Gstates[lightEl.gpioPin]=[lightEl.status, "out"];
+                slovar["Gstates"]=Gstates;
+
+              }
+
+              console.log(JSON.stringify(Gstates));
+
+              /*$.ajax({
+                  url:'/getIPAddress',
+                  type:'post',
+                  contentType: 'application/json',
+                  async: true,
+                  data: JSON.stringify({
+                    roomID: getRoomID()
+                  }),
+
+                  success:function(response){
+                    console.log(response)*/
+                    $.ajax({
+                        url:'/updateConfiguration',
+                        type:'post',
+                        contentType: 'application/json',
+                        async: true,
+                        data: JSON.stringify({
+                          ip:"192.168.0.130",
+                          configuration: Gstates
+                        }),
+
+                        success:function(){
+                            console.log("Zahtevek za dodajanje sobe uspešno poslan!")
+                        },
+                        error: function(e){
+                          console.log(e);
+                        }
+                    });
+                  /*},
+                  error: function(e){
+                    console.log(e);
+                  }
+              });*/
             },
             roomMapPath: function(room){
               return "uploads/room_"+room.id+".map";
@@ -99,7 +152,11 @@ $(document).ready(function(){
       }
   });
 
+
+
 });
+
+
 
 function getRoomID(){
   return parseInt((window.location+"").split("room")[1]);

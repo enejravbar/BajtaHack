@@ -84,6 +84,8 @@ $(document).ready(function(){
                     }
                 });
 
+                console.log(Gstates);
+
                 $.ajax({
                     url:'/updateConfiguration',
                     type:'post',
@@ -91,7 +93,7 @@ $(document).ready(function(){
                     async: true,
                     data: JSON.stringify({
                       ip: room.controller.ip,
-                      configuration: slovar
+                      configuration: Gstates
                     }),
 
                     success:function(){
@@ -114,6 +116,20 @@ $(document).ready(function(){
                     data: JSON.stringify({
                       roomID: temp,
                     }),
+
+                    success:function(){
+
+                    },
+                    error: function(e){
+                      console.log(e);
+                    }
+                });
+
+                $.ajax({
+                    url:'/removeController',
+                    type:'get',
+                    contentType: 'application/json',
+                    async: true,
 
                     success:function(){
 
@@ -276,9 +292,6 @@ $(document).ready(function(){
                  }
 
               }
-
-            },
-            computed: {
 
             }
 

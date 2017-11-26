@@ -31,7 +31,7 @@ var http = require('http');
 var httpServer = http.createServer(streznik);
 
 pool = mysql.createPool({
-	    host: "192.168.0.100",
+	    host: "192.168.0.101",
 	    user: "root",
 	    password: "root",
 	    database: "bajtahack",
@@ -246,14 +246,14 @@ streznik.get("/getRoomLight:id", function(zahteva,odgovor){
 	});
 })
 
-/*streznik.post("/updateConfiguration", function(zahteva,odgovor){
+streznik.post("/updateConfiguration", function(zahteva,odgovor){
   var ip=zahteva.body.ip;
   var controllerConfiguration=zahteva.body.configuration;
   console.log("Posiljam na IP ", ip ," konfiguracija ", controllerConfiguration);
 
   try{
     request({
-  		url: "http://"+ip+":40001/updateConf",
+  		url: "http://"+ip+":40005/updateConf",
   		json: true,
   		method: 'POST',
   		body: controllerConfiguration
@@ -267,13 +267,13 @@ streznik.get("/getRoomLight:id", function(zahteva,odgovor){
 
     }
 
-});*/
+});
 
-setInterval(function(){
+/*setInterval(function(){
 	var options = {
 	  host: '192.168.0.130',
 	  path: '/status',
-	  port: '40001'
+	  port: '40005'
 	};
 
   try{
@@ -300,12 +300,9 @@ setInterval(function(){
     					if (error) throw error;
 
     				});
-
+            connection.release();
     			} else {
-    				odgovor.json({
-    					uspeh:false,
-    					odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
-    				});
+
     			}
     		})
 
@@ -327,4 +324,22 @@ setInterval(function(){
   }
 
 
-}, 5000);
+}, 5000);*/
+
+streznik.post("/getIPAddress", function(zahteva,odgovor){
+  pool.getConnection(function(napaka1, connection) {
+		if (!napaka1) {
+			var query = connection.query('SELECT r.ipAddress FROM room r WHERE r.roomID ='+zahteva.body.roomID, function (error, results, fields) {
+				if (error) throw error;
+        odgovor.json({ip:results[0].ipAddress});
+			});
+      connection.release();
+		} else {
+			odgovor.json({
+				uspeh:false,
+				odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
+			});
+		}
+	});
+
+});

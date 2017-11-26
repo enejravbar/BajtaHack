@@ -52,14 +52,14 @@
             </tr>
           </thead>
           <tbody >
-            <tr v-for="l, lightID in room.lights" v-bind:style="[l.selected ? {background:'rgba(1,1,1,0.2)'}  : {}]">
+            <tr v-for="l, lightID in room.lights" v-bind:style="[l.selected ? {background:'rgba(1,1,1,0.2)'}  : {}]" v-on:click=(l.selected)>
               <td>Light {{lightID}}</td>
               <td>
                 GPIO {{l.gpioPin}}
               </td>
               <td>
                 <div class="onoffswitch" style="">
-                   <input :id="'statusSenzor'+lightID" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" :checked="l.status">
+                   <input :id="'statusSenzor'+lightID" type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" v-model="l.status" v-on:click="changeStateOfLight(room, lightID)">
                    <label class="onoffswitch-label" :for="'statusSenzor'+lightID">
                    <span class="onoffswitch-inner"></span>
                    <span class="onoffswitch-switch"></span>
