@@ -43,7 +43,7 @@ $(document).ready(function(){
 
               console.log(JSON.stringify(Gstates));
 
-              /*$.ajax({
+              $.ajax({
                   url:'/getIPAddress',
                   type:'post',
                   contentType: 'application/json',
@@ -53,14 +53,14 @@ $(document).ready(function(){
                   }),
 
                   success:function(response){
-                    console.log(response)*/
+                    console.log("IP--------",response)
                     $.ajax({
                         url:'/updateConfiguration',
                         type:'post',
                         contentType: 'application/json',
                         async: true,
                         data: JSON.stringify({
-                          ip:"192.168.0.130",
+                          ip:response.ip,
                           configuration: Gstates
                         }),
 
@@ -71,11 +71,11 @@ $(document).ready(function(){
                           console.log(e);
                         }
                     });
-                  /*},
+                  },
                   error: function(e){
                     console.log(e);
                   }
-              });*/
+              });
             },
             roomMapPath: function(room){
               return "uploads/room_"+room.id+".map";
