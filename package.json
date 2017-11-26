@@ -9,6 +9,8 @@
     "http": "latest",
     "multer": "latest",
     "mysql": "latest",
+    "request": "^2.83.0",
+    "require": "^2.4.20",
     "util": "latest"
   }
 }

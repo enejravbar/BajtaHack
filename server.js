@@ -5,6 +5,7 @@ var bodyParser= require('body-parser');
 var multer = require('multer');
 var mysql = require('mysql');
 var groupBy = require('group-by');
+var request = require('request');
 
 var streznik = express();
 
@@ -36,6 +37,8 @@ pool = mysql.createPool({
 	    database: "bajtahack",
 	    charset: "UTF8_GENERAL_CI"
 	});
+
+
 
 httpServer.listen(80, function(){
 	console.log("Streznik posluša na vratih 80.");
@@ -242,3 +245,86 @@ streznik.get("/getRoomLight:id", function(zahteva,odgovor){
 		}
 	});
 })
+
+/*streznik.post("/updateConfiguration", function(zahteva,odgovor){
+  var ip=zahteva.body.ip;
+  var controllerConfiguration=zahteva.body.configuration;
+  console.log("Posiljam na IP ", ip ," konfiguracija ", controllerConfiguration);
+
+  try{
+    request({
+  		url: "http://"+ip+":40001/updateConf",
+  		json: true,
+  		method: 'POST',
+  		body: controllerConfiguration
+
+    	}, function(error, response, body) {
+    		//console.log(response);
+    		console.log(body);
+    		//console.log(error)
+        });
+    }catch(e){
+
+    }
+
+});*/
+
+setInterval(function(){
+	var options = {
+	  host: '192.168.0.130',
+	  path: '/status',
+	  port: '40001'
+	};
+
+  try{
+    callback = function(response) {
+  	  var str = ''
+  	  response.on('data', function (chunk) {
+  		str += chunk;
+  	  });
+
+      response.on('error', function(error) {
+        console.log("Ni povezave z ",options.host);
+      });
+
+  	  response.on('end', function () {
+  		console.log(str);
+
+  		var conf = 0;
+  		var conn = 0;
+        var a=JSON.parse(str);
+    		if(a.configured == true) { conf = 1; conn = 1}
+    		pool.getConnection(function(napaka1, connection) {
+    			if (!napaka1) {
+    				var query = connection.query('UPDATE room SET connected = '+conn+' , configured = '+conf+ ' WHERE ipAddress LIKE ?',options.host,  function (error, results, fields) {
+    					if (error) throw error;
+
+    				});
+
+    			} else {
+    				odgovor.json({
+    					uspeh:false,
+    					odgovor:"Napaka pri vzpostavitvi povezave z podatkovno bazo!"
+    				});
+    			}
+    		})
+
+  	  });
+  	}
+  }catch(e){
+    console.log(e);
+  }
+  try{
+      var req = http.request(options, callback);
+
+    req.on('error', function(error) {
+      console.log("Ni povezave z ",options.host);
+    });
+    req.end();
+
+  }catch(e){
+    console.log(e);
+  }
+
+
+}, 5000);

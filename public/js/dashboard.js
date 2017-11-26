@@ -15,7 +15,7 @@ $(document).ready(function(){
             el: '#rooms-list',
             data: {
               connectionNotification:"",
-              gpioPins:[24,25,26,27],
+              gpioPins:[16,24,25,26,27],
               rooms: roomsTable
             },
             ready() {
@@ -83,6 +83,25 @@ $(document).ready(function(){
                       console.log(e);
                     }
                 });
+
+                $.ajax({
+                    url:'/updateConfiguration',
+                    type:'post',
+                    contentType: 'application/json',
+                    async: true,
+                    data: JSON.stringify({
+                      ip: room.controller.ip,
+                      configuration: slovar
+                    }),
+
+                    success:function(){
+                        console.log("Zahtevek za dodajanje sobe uspešno poslan!")
+                    },
+                    error: function(e){
+                      console.log(e);
+                    }
+                });
+
               },
               removeRoom: function(room){
                 var temp=room.id;
